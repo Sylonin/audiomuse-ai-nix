@@ -2,7 +2,7 @@
   description = "AudioMuse-AI — AI-powered music analysis and playlist generation";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/master";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs = { self, nixpkgs }:

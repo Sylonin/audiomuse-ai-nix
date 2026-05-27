@@ -204,16 +204,15 @@ in
 
           # Models - individual paths (code defaults to /app/model/ Docker paths)
           MODELS_PATH = "${cfg.modelsPackage}/models";
-          EMBEDDING_MODEL_PATH = "${cfg.modelsPackage}/models/msd-musicnn-1.onnx";
-          PREDICTION_MODEL_PATH = "${cfg.modelsPackage}/models/msd-msd-musicnn-1.onnx";
+          EMBEDDING_MODEL_PATH = "${cfg.modelsPackage}/models/musicnn_embedding.onnx";
+          PREDICTION_MODEL_PATH = "${cfg.modelsPackage}/models/musicnn_prediction.onnx";
+          # Upstream v2.1.0 defaults CLAP_AUDIO_MODEL_PATH to model_epoch_36.onnx
+          # (the new distilled student), but that file is not in the v4.0.0-model
+          # release — pin to the teacher (clap_audio_model.onnx) which is shipped.
           CLAP_AUDIO_MODEL_PATH = "${cfg.modelsPackage}/models/clap_audio_model.onnx";
           CLAP_TEXT_MODEL_PATH = "${cfg.modelsPackage}/models/clap_text_model.onnx";
-          DANCEABILITY_MODEL_PATH = "${cfg.modelsPackage}/models/danceability-msd-musicnn-1.onnx";
-          AGGRESSIVE_MODEL_PATH = "${cfg.modelsPackage}/models/mood_aggressive-msd-musicnn-1.onnx";
-          HAPPY_MODEL_PATH = "${cfg.modelsPackage}/models/mood_happy-msd-musicnn-1.onnx";
-          PARTY_MODEL_PATH = "${cfg.modelsPackage}/models/mood_party-msd-musicnn-1.onnx";
-          RELAXED_MODEL_PATH = "${cfg.modelsPackage}/models/mood_relaxed-msd-musicnn-1.onnx";
-          SAD_MODEL_PATH = "${cfg.modelsPackage}/models/mood_sad-msd-musicnn-1.onnx";
+          # Lyrics models extracted into models/
+          LYRICS_MODEL_DIR = "${cfg.modelsPackage}/models";
           HF_HOME = "${cfg.modelsPackage}/cache/huggingface";
           HF_HUB_OFFLINE = "1";
           TRANSFORMERS_OFFLINE = "1";
