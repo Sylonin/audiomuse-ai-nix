@@ -17,6 +17,8 @@ let
     };
 
     # Binary wheel, no build deps needed
+    propagatedBuildInputs = with final.python312Packages; [ numpy ];
+
     pythonImportsCheck = [ "voyager" ];
 
     meta = with final.lib; {
