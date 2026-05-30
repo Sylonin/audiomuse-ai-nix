@@ -1,4 +1,6 @@
-{ gpuSupport ? true }:
+{
+  gpuSupport ? true,
+}:
 final: prev:
 let
   # Voyager - Spotify's ANN library (not in nixpkgs)
@@ -29,77 +31,83 @@ let
   };
 
   # AudioMuse-AI Python environment with all dependencies
-  audiomuse-ai-python = final.python312.withPackages (ps: with ps; [
-    # Web framework
-    flask
-    flask-cors
-    flasgger
+  audiomuse-ai-python = final.python312.withPackages (
+    ps:
+    with ps;
+    [
+      # Web framework
+      flask
+      flask-cors
+      flasgger
 
-    # Task queue
-    redis
-    rq
+      # Task queue
+      redis
+      rq
 
-    # Database
-    psycopg2
+      # Database
+      psycopg2
 
-    # Audio processing
-    librosa
-    soundfile
-    resampy
-    pydub
-    mutagen
+      # Audio processing
+      librosa
+      soundfile
+      resampy
+      pydub
+      mutagen
 
-    # ML/Scientific
-    numpy
-    scipy
-    numba
-    scikit-learn
-    umap-learn
-    transformers
-    sentencepiece
+      # ML/Scientific
+      numpy
+      scipy
+      numba
+      scikit-learn
+      umap-learn
+      transformers
+      sentencepiece
 
-    # ONNX
-    onnx
-    onnxruntime  # CUDA enabled via global cudaSupport = true
+      # ONNX
+      onnx
+      onnxruntime # CUDA enabled via global cudaSupport = true
 
-    # Utilities
-    pyyaml
-    requests
-    rapidfuzz
-    ftfy
-    packaging
-    protobuf
-    httpx
+      # Utilities
+      pyyaml
+      requests
+      rapidfuzz
+      ftfy
+      packaging
+      protobuf
+      httpx
 
-    # LLM integrations
-    google-genai
-    mistralai
+      # LLM integrations
+      google-genai
+      mistralai
 
-    # MCP (Model Context Protocol)
-    mcp
+      # MCP (Model Context Protocol)
+      mcp
 
-    # Voyager (from our custom package)
-    voyager
-  ] ++ final.lib.optionals gpuSupport [
-    # GPU-accelerated ML (RAPIDS cuML)
-    cupy
-    final.python312Packages.rmm
-    final.python312Packages.pylibraft
-    final.python312Packages.cuvs
-    final.python312Packages.cuml
-  ]);
+      # Voyager (from our custom package)
+      voyager
+    ]
+    ++ final.lib.optionals gpuSupport [
+      # GPU-accelerated ML (RAPIDS cuML)
+      cupy
+      final.python312Packages.rmm
+      final.python312Packages.pylibraft
+      final.python312Packages.cuvs
+      final.python312Packages.cuml
+    ]
+  );
 in
 {
   # AudioMuse-AI - Music analysis and playlist generation service
   audiomuse-ai = final.stdenvNoCC.mkDerivation rec {
     pname = "audiomuse-ai";
-    version = "2.1.0";
+    version = "2.1.1";
 
     src = final.fetchFromGitHub {
       owner = "NeptuneHub";
       repo = "AudioMuse-AI";
       rev = "v${version}";
-      hash = "sha256-EOHjsolE2Ae9z7z5A1E6Cq/pfP8SX7nQ6aKcHlel8F0=";
+      hash = "sha256-rp3ULn1kkh3vBxnC7kWZmolS80TUlAmaxPybZCngY6w=";
+
     };
 
     nativeBuildInputs = [ final.makeWrapper ];
@@ -203,7 +211,10 @@ in
       hash = "sha256-mnS/mSV6xrQD+10FVEoO4yZ1i+2ybaSYTxIiIZMZUpY=";
     };
 
-    nativeBuildInputs = [ final.gnutar final.gzip ];
+    nativeBuildInputs = [
+      final.gnutar
+      final.gzip
+    ];
 
     installPhase = ''
       runHook preInstall
@@ -240,28 +251,32 @@ in
   # Navidrome plugins — extend the upstream navidromePlugins set with our
   # AudioMuse-AI plugin. discord-rich-presence is already in upstream
   # nixos-unstable (navidromePlugins.discord-rich-presence v1.0.0).
-  navidromePlugins = prev.navidromePlugins.extend (self: super: {
-    audiomuse-ai = final.buildNavidromePlugin {
-      pname = "audiomuse-ai";
-      version = "unstable-2026-05-13";
+  navidromePlugins = prev.navidromePlugins.extend (
+    self: super: {
+      audiomuse-ai = final.buildNavidromePlugin {
+        pname = "audiomuse-ai";
+        version = "unstable-2026-05-13";
 
-      src = final.fetchFromGitHub {
-        owner = "NeptuneHub";
-        repo = "AudioMuse-AI-NV-plugin";
-        rev = "66154bbdd76dd2159b70ec2ac5bc09cc57e20baf";
-        hash = "sha256-8MTCyIxLaPkXGsATq44PNx2yJzgaWpp5c4hg0J+j6Yo=";
+        src = final.fetchFromGitHub {
+          owner = "NeptuneHub";
+          repo = "AudioMuse-AI-NV-plugin";
+          rev = "66154bbdd76dd2159b70ec2ac5bc09cc57e20baf";
+          hash = "sha256-8MTCyIxLaPkXGsATq44PNx2yJzgaWpp5c4hg0J+j6Yo=";
+        };
+
+        vendorHash = "sha256-mXes+doBSa5kcfHp1cuzTz30wnyyPN7NLC0iOSL8FDo=";
+
+        meta = with final.lib; {
+          description = "AudioMuse-AI plugin for Navidrome - AI-powered similar tracks";
+          homepage = "https://github.com/NeptuneHub/AudioMuse-AI-NV-plugin";
+          license = licenses.mit;
+        };
       };
-
-      vendorHash = "sha256-mXes+doBSa5kcfHp1cuzTz30wnyyPN7NLC0iOSL8FDo=";
-
-      meta = with final.lib; {
-        description = "AudioMuse-AI plugin for Navidrome - AI-powered similar tracks";
-        homepage = "https://github.com/NeptuneHub/AudioMuse-AI-NV-plugin";
-        license = licenses.mit;
-      };
-    };
-  });
+    }
+  );
 
   # Valkey (Redis fork) has flaky cluster/replication tests — skip them
-  valkey = prev.valkey.overrideAttrs (old: { doCheck = false; });
+  valkey = prev.valkey.overrideAttrs (old: {
+    doCheck = false;
+  });
 }
